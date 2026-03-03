@@ -19,3 +19,11 @@ lead, you answer and shut up.
 
 # Environment
 Python project. CLI application. Keep it simple.
+
+# GitHub SSH
+SSH agent doesn't persist between shell calls in this container. Before any
+git push/pull, set the key path explicitly:
+```
+export GIT_SSH_COMMAND="ssh -i /home/sandbox/.claude/.ssh/id_ed25519"
+```
+Or inline it: `GIT_SSH_COMMAND="ssh -i /home/sandbox/.claude/.ssh/id_ed25519" git push`

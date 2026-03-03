@@ -1,6 +1,6 @@
-# Zork Clone — Design Doc (WIP)
+# Zork Clone — Design Doc
 
-## Status: Design phase, not yet building
+## Status: Requirements locked, architecture TBD
 
 ## What We're Building
 Python CLI text adventure. Cheap and dirty Zork clone focused on the engine
@@ -10,38 +10,63 @@ Not a product — a demo.
 ## Decisions Made
 
 ### Parser
-- Strict 2-word `verb noun` format (like original Zork)
-- Supported verbs: `go`, `get`/`take`, `drop`, `look`, `examine`, `open`, `close`, `use`, `inventory`
+- Three input patterns:
+  - **One-word:** `inventory`, `look`, `quit`, and bare directions (`north`,
+    `south`, `east`, `west`, `up`, `down` as shortcuts for `go <direction>`)
+  - **Two-word:** `verb noun` — the standard format
+  - **No three-word commands.** No `use X on Y`, no `get X from Y`.
+- Supported verbs: `go`, `get`/`take`, `drop`, `look`, `examine`, `open`,
+  `close`, `use`, `inventory`, `quit`
+- `look` with no noun = describe current room
+- `look [noun]` and `examine [noun]` are synonyms — both inspect an object
+- `examine` with no noun = error (snarky)
+- `use` is one-arg, context-free: `use key` does the obvious thing based on
+  the object's default action in the current context. No obvious action = snarky error.
+- `quit` — one-word command, snarky confirmation prompt before exiting
 
 ### Rooms
-- 7 total: hub (start) + 6 directional rooms
+- 9 total: hub (start) + 6 directional rooms + 2 hidden rooms behind doors
 - All 6 directions off the hub: north, south, east, west, up, down
-- Some rooms cross-link to each other bypassing the hub (TBD which ones)
+- 2 hidden dead-end rooms revealed by doors (reward for figuring out effects)
+- 2 bridge passages that bypass the hub (BD picks which rooms they connect)
+  - Bidirectional, always open (not gated behind interactions)
+  - Player uses a direction to traverse them (room description tells you
+    there's a passage in that direction)
 - Verbose description on first visit, short description on revisit
+- Theme: classic fantasy dungeon — underground, stone, torches
 
 ### Interaction
-- Medium depth: objects you can pick up/examine, things that react (pull lever
-  in one room affects another room), but NOT full puzzle dependency graphs
+- 2 cross-room effects max. Boolean state only (on/off, open/closed).
+  No chaining — A affects B, full stop. B does not cascade to C.
+- Simple cause-and-effect is fine (lever opens grate, bell unlocks door).
+  No multi-step puzzle chains. Bridges are always open.
 - No combat
 - No dark rooms / lighting mechanic
 - No win/lose condition
 
+### Objects
+- 10-12 interactive objects across 9 rooms
+- Mix of takeable items and stationary interactables
+- Empty rooms are fine — not every room needs an object
+- Minimum 0 objects per room, no enforced floor
+
 ### Inventory
 - Yes, player has inventory
-- Second priority after core room/parser mechanics
-- No weight/capacity limits planned
+- No weight/capacity limits
+
+### Open/Close
+- Doors only. No containers.
+- Opening a door reveals a passage (new exit becomes available)
+- No inventory-inside-inventory, no `get X from Y`
+
+### Parser Errors
+- Snarky. Classic Zork energy. If it's not funny, we've failed.
+- Implementation details (random pools vs fixed responses, context-awareness)
+  are code decisions, not design decisions
 
 ### Other
 - No save/load
-- No combat
-- Story/theme: dealer's choice, steal from training data freely
+- No combat (listed twice on purpose — scope creep prevention)
 
-## Open Questions (Dan hasn't answered yet)
-1. **Cross-links between rooms** — Does Dan care which rooms connect to each
-   other outside the hub, or is it dealer's choice?
-2. **Object count** — Proposing 8-12 interactive objects across 7 rooms. Enough?
-3. **Parser error personality** — Classic Zork had snarky error messages. Fun
-   with it, or keep it dry?
-
-## Architecture (not yet discussed)
-TBD — no code decisions made yet. Will design after requirements are locked.
+## Architecture
+TBD — no code decisions made yet.
